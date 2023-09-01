@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Post
+from .models import Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-from .forms import EmailPostForm
+from .forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
+from django.views.decorators.http import require_POST
 
 
 
@@ -55,8 +56,13 @@ def post_detail(request, year, month, day, post):
                             publish__year=year,
                             publish__month=month,
                             publish__day=day)
-    
-    return render(request, 'blog/post/detail.html', {'post':post})
+    # list of active comments for this post
+    comments = post.comments.filter(active=True)
+    form = CommentForm()
+        
+    return render(request, 'blog/post/detail.html', {'post':post,
+                                                    'comments': comments,
+                                                    'form': form})
 
 
 def post_share(request, post_id):
@@ -84,3 +90,22 @@ def post_share(request, post_id):
     return render(request, 'blog/post/share.html', {'post': post,
                                                     'form': form,
                                                     'sent': sent})
+
+
+@require_POST
+def post_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED) # retrieve a published post by its id
+    comment = None # this store the comment object when it gets created
+    # a comment was posted
+    form = CommentForm(data=request.POST) # instantiate the form using the submitted POST data
+    if form.is_valid(): # this validates using is_valid() method
+        # create a comment object without saving it to the database
+        comment = form.save(commit=False) # if form is valid, create a new Comment object, creates an instance of the model that the form is linked to and saves it to the database
+        # assing the post to the comment
+        comment.post = post # we assign the post to the comment we created
+        # save the comment to the database
+        comment.save() # save the new comment to the database by calling its save() method
+    return render(request, 'blog/post/comment.html', {'post':post,
+                                                    'form':form,
+                                                    'comment':comment})
+
