@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 # Create your models here.
 # method to implement a manager that will allow us to retrieve posts using the notation Post.published.all()
@@ -18,7 +19,7 @@ class Post(models.Model):
         PUBLISHED = 'PB', 'Published' 
 
     title = models.CharField(max_length=250)
-    slug = models.SlugField(max_length=250)
+    slug = models.SlugField(max_length=250, unique_for_date='publish')
     # this field defines a many-to-one relationship, meaning that each post is written by a user
     # and a user can write any number of posts. Django create a foreign key using the PK of the related model
     author = models.ForeignKey(User,
@@ -52,3 +53,12 @@ class Post(models.Model):
     # this return a string with the human readable representation of the object
     def __str__(self):
         return self.title
+    
+    # the reverse function build the url dynamically using the url name defined in the url patterns
+    def get_absolute_url(self):
+        return reverse('blog:post_detail', 
+                        args=[self.publish.year,
+                            self.publish.month,
+                            self.publish.day,
+                            self.slug])
+    
