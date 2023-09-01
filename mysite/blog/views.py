@@ -1,8 +1,22 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Post
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.generic import ListView
 
-# Create your views here.
+
+
+# CLASS-BASED VIEWS
+class PostListView(ListView):
+    '''
+    Alternative post list view
+    '''
+    queryset = Post.published.all()
+    context_object_name = 'posts' # for the query results
+    paginate_by = 3 # this define the pagination of results returning 3 objects per page
+    template_name = 'blog/post/list.html'
+
+
+# FUNCTIONS-BASED VIEWS
 # we retrieve all the posts with the PUBLISHED status using the published manager created
 def post_list(request):
     post_list = Post.published.all()
