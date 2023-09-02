@@ -15,8 +15,15 @@
     </div>
     <div id="sidebar">
         <h2>My blog</h2>
-        <p>This is my blog.</p>
-        I've written {% total_posts %} posts so far.
+        <p>
+            This is my blog.
+            I've written {% total_posts %} posts so far.
+        </p>
+        <!-- The template tag is called, passing the number
+            of posts to display, and the template is rendered in
+            place with the given context -->
+        <h3>Latest posts</h3>
+        {% show_latest_posts 3 %}
     </div>
 </body>
 </html>
