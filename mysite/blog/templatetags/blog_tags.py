@@ -1,6 +1,7 @@
 # simple tag to retrieve the total posts that have been published on the blog
 from django import template
 from ..models import Post
+from django.db.models import Count
 
 
 # Each module that contains template tags needs to define a variable called 
@@ -19,3 +20,14 @@ def total_posts():
 def show_latest_posts(count=5):
     latest_posts = Post.published.order_by('-publish')[:count]
     return {'latest_posts': latest_posts}
+
+
+@register.simple_tag
+def get_most_commented_posts(count=5):
+    # build a QuerySet using the annotate() function to aggregate the
+    # total number of comments for each post.
+    return Post.published.annotate(
+                total_comments=Count('comments') #  store the number
+                                                # of comments in the computed total_comments field for each Post object
+                ).order_by('-total_comments')[:count] #  order the QuerySet by
+                                                        # the computed field in descending order.
