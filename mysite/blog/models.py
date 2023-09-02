@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
+from taggit.managers import TaggableManager
 
 # Create your models here.
 # method to implement a manager that will allow us to retrieve posts using the notation Post.published.all()
@@ -41,6 +42,7 @@ class Post(models.Model):
     # this is from the custom manager with notation Post.published.all()
     objects = models.Manager() # the default manager
     published = PublishedManager() # our custom manager
+    tags = TaggableManager() # allow to add, retrieve and remove tags form Post objects
 
     # this defines metadata for the model. we use the ordering attribute to tell django that it should sort the results
     # by the publish field. the hyphen is used to indicate descending order

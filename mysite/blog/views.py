@@ -5,7 +5,7 @@ from django.views.generic import ListView
 from .forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
-
+from taggit.models import Tag
 
 
 
@@ -22,8 +22,12 @@ class PostListView(ListView):
 
 # FUNCTIONS-BASED VIEWS
 # we retrieve all the posts with the PUBLISHED status using the published manager created
-def post_list(request):
+def post_list(request, tag_slug=None):
     post_list = Post.published.all()
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        post_list = post_list.filter(tags__in=[tag])
     # pagination with 3 posts per page
     paginator = Paginator(post_list, 3) # instantiate paginator class with the number of objects to return
     page_number = request.GET.get('page', 1) # retrive the page GET HTTP parameter and store it in the page_number variable
@@ -38,7 +42,8 @@ def post_list(request):
         posts = paginator.page(paginator.num_pages)
     
     # posts = paginator.page(page_number)  obtain objects for the page calling page() method. Returns a page object that we store in the posts variable
-    return render(request, 'blog/post/list.html', {'posts':posts}) # pass the age number and the posts object to the template
+    return render(request, 'blog/post/list.html', {'posts':posts,
+                                                    'tag': tag}) # pass the age number and the posts object to the template
 
 # this is the post detail view. takes the id argument of a post, trying to retrieve the post
 # object with the given id by calling the get() method
