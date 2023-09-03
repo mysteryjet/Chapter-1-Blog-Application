@@ -5,11 +5,44 @@
 
 {% block content %}
 <h1>My blog</h1>
+
 {% if tag %}
     <h2>Posts tagged with "{{ tag.name }}"</h2>
 {% endif %}
+
 {% for post in posts %}
-<h2>
+    <div class="card-group" >
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                    </h5>
+                    <p class="card-subtitle mb-2 text-body-secondary date">
+                        Published {{ post.publish }} by {{ post.author }}
+                    </p>
+                    <p class="card-text">
+                        {{ post.body|markdown|truncatewords_html:30 }}
+                    </p>
+                    <div class="card-footer">
+                        <small class="text-body-secondary tags">
+                            Tags: 
+                            {% for tag in post.tags.all %}
+                                <a href="{% url "blog:post_list_by_tag" tag.slug %}">
+                                    {{ tag.name }}
+                                </a>
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </small>
+                    </div>
+                    <p class="tags">
+                        
+                    </p>
+                </div>
+                
+            </div>
+    </div>
+<!-- FROM BOOK BELOW -->
+<!-- <h2>
     <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
 </h2>
 <p class="tags">
@@ -24,8 +57,10 @@
 <p class="date">
     Published {{ post.publish }} by {{ post.author }}
 </p>
-{{ post.body|markdown|truncatewords_html:30 }}
+{{ post.body|markdown|truncatewords_html:30 }} -->
+
 {% endfor %}
+
 <!-- here is the pagination.html template -->
 {% include "pagination.html" with page=posts %}
 {% endblock %}
