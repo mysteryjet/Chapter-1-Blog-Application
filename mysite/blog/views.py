@@ -2,13 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from .models import Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from .forms import EmailPostForm, CommentForm, SearchForm
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from taggit.models import Tag
 from django.db.models import Count
-
 
 
 
@@ -127,11 +126,21 @@ def post_search(request):
     query = None
     results = []
 
+    # create a SearchQuery object, filter results by it, and use SearchRank to order 
+    # the results by relevancy
     if 'query' in request.GET:
         form = SearchForm(request.GET) # send the form using the GET method instead of POSTso the resulting URL includes the query parameter 
         if form.is_valid(): # if valid, search for published post with a custom SearchVector instance built with the title and body fields
             query = form.cleaned_data['query']
-            results = Post.published.annotate(search=SearchVector('title','body'),).filter(search=query)
-    return render(request, 'blog/post/search.html',{'form':form,
-                                                    'query':query,
-                                                    'results':results})
+            search_vector = SearchVector('title', weight='A', config='spanish') + SearchVector('body', weight='B', config='spanish') # pass a config attribute to SearchVector and SearchQuery to use a different search configuration, executes stemming and removes stops in Spanish
+            search_query = SearchQuery(query, config='spanish')
+            results = Post.published.annotate(
+                search=search_vector,
+                rank=SearchRank(search_vector, search_query)
+                ).filter(rank__gte=0.3).order_by('-rank')
+            
+    return render(request,
+                'blog/post/search.html',
+                {'form':form,
+                'query':query,
+                'results':results})
