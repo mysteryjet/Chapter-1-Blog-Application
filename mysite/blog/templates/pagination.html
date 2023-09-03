@@ -2,16 +2,34 @@
 to render the previous and the next links, and to display the current page and total pages
 of results -->
 
-<div class="pagination">
+<!-- <div class="pagination">
     <span class="step-links">
         {% if page.has_previous %}
         <a href="?page={{ page.previous_page_number }}">Previous</a>
         {% endif %}
         <span class="current">
-            Page {{ page.number }} of {{ page.paginator.num_pages}}.
+            Page {{ page.number }} of {{ page.paginator.num_pages}}
         </span>
         {% if page.has_next %}
         <a href="?page={{ page.next_page_number }}">Next</a>
         {% endif %}
     </span>
-</div>
+</div> -->
+
+<nav aria-label="Page navigation example pagination">
+    <ul class="pagination justify-content-center step-links">
+        {% if page.has_previous %}
+            <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
+        {% endif %}
+        <li class="page-item disabled">
+            <a class="page-link">
+                Page {{ page.number }} of {{ page.paginator.num_pages}}
+            </a>
+        </li> 
+        {% if page.has_next %}
+            <li>
+                <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
