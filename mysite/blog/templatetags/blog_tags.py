@@ -2,6 +2,8 @@
 from django import template
 from ..models import Post
 from django.db.models import Count
+from django.utils.safestring import mark_safe
+import markdown
 
 
 # Each module that contains template tags needs to define a variable called 
@@ -31,3 +33,9 @@ def get_most_commented_posts(count=5):
                                                 # of comments in the computed total_comments field for each Post object
                 ).order_by('-total_comments')[:count] #  order the QuerySet by
                                                         # the computed field in descending order.
+
+
+@register.filter(name='markdown')
+def markdown_format(text):
+    return mark_safe(markdown.markdown(text))
+

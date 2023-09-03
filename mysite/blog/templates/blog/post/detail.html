@@ -1,6 +1,10 @@
 {% extends "blog/base.html" %}
+{% load blog_tags %}
+
 {% block title %}{{ post.title }}{% endblock %}
+
 {% block content %}
+
 <h1>{{ post.title }}</h1>
 <p class="date">
     Published {{ post.publish }} by {{ post.author }}
@@ -11,7 +15,7 @@
     <h2>Posts tagged with "{{ tag.name }}"</h2>
 {% endif %}
 
-{{ post.body|linebreaks }}
+{{ post.body|markdown }}
 
 <!-- this show the tags related to this post -->
 <p class="tags">
